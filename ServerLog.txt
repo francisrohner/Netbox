@@ -1,0 +1,71 @@
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [test] from client #1
+Server sending terminate message
+New connection handler running handling client #2
+Received message [a] from client #2
+Received message [b] from client #2
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+Received message [b] from client #1
+Received message [c] from client #1
+Server sending terminate message
+New connection handler running handling client #2
+Received object [Data: ClientTest, Value: -1] from client #2
+--Server Execution Start--
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+Received message [b] from client #1
+Received object [Data: ClientTest, Value: -1] from client #1
+Received message [Exit] from client #1
+Server sending terminate message
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+New connection handler running handling client #2
+Received message [a] from client #2
+Received object [Data: ClientTest, Value: -1] from client #1
+Received message [Exit] from client #1
+Server sending terminate message
+Received message [a] from client #2
+Received message [a] from client #2
+Received message [Kill] from client #2
+Server sending terminate message
+New connection handler running handling client #3
+--Server Execution Start--
+New connection handler running handling client #1
+New connection handler running handling client #2
+Received message [Kill] from client #1
+Server sending terminate message
+Received message [a] from client #2
+Received message [b] from client #2
+Killing connection handlers
+--Server Execution End--
+--Server Execution Start--
+New connection handler running handling client #1
+New connection handler running handling client #2
+Received message [d] from client #1
+Server sending terminate message
+Killing connection handlers
+--Server Execution End--
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+Received message [b] from client #1
+Received object [Data: ClientTest, Value: -1] from client #1
+Received message [e] from client #1
+Server sending terminate message
+Killing connection handlers
+--Server Execution End--
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+Received message [b] from client #1
+Received object [Data: ClientTest, Value: -1] from client #1
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+Received message [b] from client #1
+Received object [Data: ClientTest, Value: -1] from client #1
