@@ -69,3 +69,21 @@ New connection handler running handling client #1
 Received message [a] from client #1
 Received message [b] from client #1
 Received object [Data: ClientTest, Value: -1] from client #1
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [a] from client #1
+Received message [b] from client #1
+Received message [v] from client #1
+Server sending terminate message
+New connection handler running handling client #2
+Killing connection handlers
+--Server Execution End--
+--Server Execution Start--
+New connection handler running handling client #1
+Received message [exit] from client #1
+Server sending terminate message
+New connection handler running handling client #2
+Received message [shutdown] from client #2
+Server sending terminate message
+Killing connection handlers
+--Server Execution End--

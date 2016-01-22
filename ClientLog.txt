@@ -76,3 +76,21 @@ Received message [<<Initiate>>] from server.
 Received message [Response A] from server.
 Received message [Response B] from server.
 Received message [SomeData object received successfully from Client] from server.
+--Client Execution Start--
+Received message [<<Initiate>>] from server.
+Received message [Response A] from server.
+Received message [Response B] from server.
+Received message [<<Terminate>>] from server.
+--Client Execution End--
+--Client Execution Start--
+Received message [<<Initiate>>] from server.
+Received message [<<Terminate>>] from server.
+--Client Execution End--
+--Client Execution Start--
+Received message [<<Initiate>>] from server.
+Received message [<<Terminate>>] from server.
+--Client Execution End--
+--Client Execution Start--
+Received message [<<Initiate>>] from server.
+Received message [<<Terminate>>] from server.
+--Client Execution End--
