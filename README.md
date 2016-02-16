@@ -1,2 +1,2 @@
 ﻿Java socket programming sandbox
-﻿Requires Twitter4j library: https://www.linkedin.com/in/francisrohner
+﻿Requires Twitter4j library: http://twitter4j.org/en/index.html
