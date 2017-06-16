@@ -2,6 +2,7 @@ package network;
 
 import io.ConfigReader;
 import io.Logger;
+import io.ServerConsoleThread;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -33,7 +34,11 @@ public class Server
         logger.log("--Server Execution Start--");
         try
         {
-            (new Thread(new ServerConsole(this))).start();
+            //(new Thread(new OldShit(this))).start();
+            ServerConsoleThread serverConsoleThread = new ServerConsoleThread(this);
+            Thread thread = new Thread(serverConsoleThread);
+            thread.start();
+
             int serverPort = SERVER_DEFAULT_PORT;
             if ((new File(SERVER_CONFIG_FILENAME)).exists())
             {
@@ -58,6 +63,14 @@ public class Server
 
 
     }
+
+    public void ShareClientMessage(String msg, int client)
+    {
+        for(int i = 0; i < connectionHandlers.size(); i++)
+            if((i + 1) != client)
+                connectionHandlers.get(i).SendMessage(connectionHandlers.get(client - 1).nick + ": " +  msg);
+    }
+
     public void haltServer()
     {
         logger.log("Killing connection handlers");
@@ -71,5 +84,12 @@ public class Server
     {
         IGNORE_CONFIG = args.length > 0 && args[0].equalsIgnoreCase("noconfig");
         new Server();
+    }
+
+    public void Send(String currentLine)
+    {
+        for(ConnectionHandler handler : connectionHandlers)
+            if(handler.isOpen())
+                handler.SendMessage(currentLine);
     }
 }

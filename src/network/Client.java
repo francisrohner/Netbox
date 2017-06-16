@@ -2,6 +2,7 @@ package network;
 
 import data.SomeData;
 import io.ConfigReader;
+import io.ClientConsoleThread;
 import io.Logger;
 
 import java.io.*;
@@ -25,6 +26,17 @@ public class Client
     private ObjectOutputStream out;
     private Logger logger;
 
+    private String name;
+
+    public void Send(Object obj)
+    {
+        try {
+            out.writeObject(obj);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Client()
     {
         logger = new Logger(CLIENT_LOG_FILENAME);
@@ -41,8 +53,17 @@ public class Client
             }
             socket = new Socket(clientHost, clientPort);
             stdIn = new BufferedReader(new InputStreamReader(System.in));
+
+            System.out.print("Enter a name: " );
+            name = stdIn.readLine();
+
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
+
+            out.writeObject("set nick " + name);
+            ClientConsoleThread kh = new ClientConsoleThread(this, stdIn);
+            Thread consoleThread = new Thread(kh);
+            consoleThread.start();
 
             Object currentObject;
             while((currentObject = in.readObject()) != null)
@@ -50,24 +71,12 @@ public class Client
                 if(currentObject instanceof String)
                 {
                     String currentLine = (String) currentObject;
-                    logger.log("Received message [" + currentLine + "] from server.");
+
+                    //logger.log("Received message [" + currentLine + "] from server.");
+                    logger.log(currentLine);
                     if (currentLine.equals("<<Terminate>>"))
                     {
                         break;
-                    }
-                    else
-                    {
-                        String userInput = stdIn.readLine();
-                        if(!userInput.equals("SomeData"))
-                        {
-                            out.writeObject(userInput);
-                            out.flush();
-                        }
-                        else
-                        {
-                            out.writeObject(new SomeData("ClientTest", -1));
-                            out.flush();
-                        }
                     }
                 }
                 else if(currentObject instanceof SomeData)
@@ -100,3 +109,4 @@ public class Client
         new Client();
     }
 }
+

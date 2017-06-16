@@ -16,12 +16,22 @@ public class ConnectionHandler implements Runnable
     private ObjectOutputStream out;
     private int clientHandled;
     private boolean open;
+    public String nick;
 
     public ConnectionHandler(Server server, Socket clientSocket)
     {
         this.server = server;
         this.clientSocket = clientSocket;
         open = true;
+    }
+
+    public void SendMessage(String msg)
+    {
+        try {
+            out.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isOpen() { return open; }
@@ -41,6 +51,7 @@ public class ConnectionHandler implements Runnable
     public void run()
     {
         clientHandled =  ++server.numClients;
+        nick = "Client #" + clientHandled;
         server.logger.log("New connection handler running handling client #" + clientHandled);
         try
         {
@@ -52,26 +63,38 @@ public class ConnectionHandler implements Runnable
             Object currentObject;
             out.writeObject("<<Initiate>>");
             out.flush();
+
+
+
             while ((currentObject = in.readObject()) != null) {
                 if(currentObject instanceof String)
                 {
                     String currentLine = (String)currentObject;
+                    server.ShareClientMessage(currentLine, clientHandled);
                     server.logger.log("Received message [" + currentLine + "] from client #" + clientHandled);
-                    if (currentLine.toLowerCase().contains("a"))
+                    if (currentLine.toLowerCase().equals("a"))
                     {
                         out.writeObject("Response A");
                         out.flush();
-                    } else if (currentLine.toLowerCase().contains("b"))
+                    } else if (currentLine.toLowerCase().equals("b"))
                     {
                         out.writeObject("Response B");
                         out.flush();
-                    } else
+                    } else if(currentLine.toLowerCase().equals("exit"))
                     {
                         server.logger.log("Server sending terminate message");
                         out.writeObject("<<Terminate>>");
                         out.flush();
                         open = false;
                         break;
+                    }
+                    else if(currentLine.toLowerCase().contains(("set nick")))
+                    {
+                        nick = currentLine.replace("set nick", "").trim();
+                    }
+                    else
+                    {
+                        //???
                     }
                 }
                 else if(currentObject instanceof SomeData)
