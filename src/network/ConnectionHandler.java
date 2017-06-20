@@ -1,5 +1,6 @@
 package network;
 
+import data.ByteUtils;
 import data.SomeData;
 
 import java.io.*;
@@ -12,8 +13,8 @@ public class ConnectionHandler implements Runnable
 {
     private Server server;
     private Socket clientSocket;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
+    private InputStream in;
+    private OutputStream out;
     private int clientHandled;
     private boolean open;
     public String nick;
@@ -28,7 +29,8 @@ public class ConnectionHandler implements Runnable
     public void SendMessage(String msg)
     {
         try {
-            out.writeObject(msg);
+            out.write(ByteUtils.TransmissionObject(msg, ByteUtils.ObjectType.STRING));
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -39,7 +41,9 @@ public class ConnectionHandler implements Runnable
     {
         try
         {
-            out.writeObject("<<Terminate>>");
+            out.write(ByteUtils.TransmissionObject("<<Terminate>>", ByteUtils.ObjectType.STRING));
+            out.flush();
+            //out.writeObject("<<Terminate>>");
         }
         catch (IOException e)
         {
@@ -56,17 +60,22 @@ public class ConnectionHandler implements Runnable
         try
         {
 
-            out = new ObjectOutputStream(clientSocket.getOutputStream());
-            in = new ObjectInputStream(clientSocket.getInputStream());
+            out = clientSocket.getOutputStream();
+            in = clientSocket.getInputStream();
             //Send initial message to client
             SomeData someData = new SomeData("Test", 7);
             Object currentObject;
-            out.writeObject("<<Initiate>>");
+            //byte[] currentData;
+            out.write(ByteUtils.TransmissionObject("<<Initiate>>", ByteUtils.ObjectType.STRING));
             out.flush();
 
+            //in.readFully(currentData);
 
+            for(;;) {
 
-            while ((currentObject = in.readObject()) != null) {
+                byte[] streamBytes = ByteUtils.GetBytesFromStream(in);
+                currentObject = ByteUtils.ParseObject(streamBytes);
+                //ByteUtils.
                 if(currentObject instanceof String)
                 {
                     String currentLine = (String)currentObject;
@@ -74,16 +83,16 @@ public class ConnectionHandler implements Runnable
                     server.logger.log("Received message [" + currentLine + "] from client #" + clientHandled);
                     if (currentLine.toLowerCase().equals("a"))
                     {
-                        out.writeObject("Response A");
+                        out.write(ByteUtils.TransmissionObject("Response A", ByteUtils.ObjectType.STRING));
                         out.flush();
                     } else if (currentLine.toLowerCase().equals("b"))
                     {
-                        out.writeObject("Response B");
+                        out.write(ByteUtils.TransmissionObject("Response B", ByteUtils.ObjectType.STRING));
                         out.flush();
                     } else if(currentLine.toLowerCase().equals("exit"))
                     {
                         server.logger.log("Server sending terminate message");
-                        out.writeObject("<<Terminate>>");
+                        out.write(ByteUtils.TransmissionObject("<<Terminate>>", ByteUtils.ObjectType.STRING));
                         out.flush();
                         open = false;
                         break;
@@ -100,13 +109,15 @@ public class ConnectionHandler implements Runnable
                 else if(currentObject instanceof SomeData)
                 {
                     server.logger.log("Received object [" + currentObject.toString() + "] from client #" + clientHandled);
-                    out.writeObject("SomeData object received successfully from Client");
+                    out.write(ByteUtils.TransmissionObject("SomeData object received successfully from Client", ByteUtils.ObjectType.STRING));
+                    //out.writeObject("SomeData object received successfully from Client");
                     out.flush();
                 }
                 else
                 {
                     server.logger.log("Unknown object received from Client");
-                    out.writeObject("Unknown object received from Client");
+                    out.write(ByteUtils.TransmissionObject("Unknown object received from Client", ByteUtils.ObjectType.STRING));
+                    //out.writeObject("Unknown object received from Client");
                     out.flush();
                 }
             }
@@ -117,9 +128,9 @@ public class ConnectionHandler implements Runnable
         {
             ex.printStackTrace();
         }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
+        //catch (ClassNotFoundException e)
+        //{
+        //    e.printStackTrace();
+        //}
     }
 }

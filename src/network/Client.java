@@ -1,5 +1,6 @@
 package network;
 
+import data.ByteUtils;
 import data.SomeData;
 import io.ConfigReader;
 import io.ClientConsoleThread;
@@ -22,8 +23,8 @@ public class Client
 
     private Socket socket;
     private BufferedReader stdIn;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
+    private InputStream in;
+    private OutputStream out;
     private Logger logger;
 
     private String name;
@@ -31,7 +32,8 @@ public class Client
     public void Send(Object obj)
     {
         try {
-            out.writeObject(obj);
+            out.write(ByteUtils.TransmissionObject(obj, ByteUtils.ObjectType.STRING));
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -57,32 +59,40 @@ public class Client
             System.out.print("Enter a name: " );
             name = stdIn.readLine();
 
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
+            out = socket.getOutputStream();
+            in = socket.getInputStream();
 
-            out.writeObject("set nick " + name);
+            //out.writeObject("set nick " + name);
+            out.write(ByteUtils.TransmissionObject("set nick" + name, ByteUtils.ObjectType.STRING));
+            out.flush();
+
             ClientConsoleThread kh = new ClientConsoleThread(this, stdIn);
             Thread consoleThread = new Thread(kh);
             consoleThread.start();
 
             Object currentObject;
-            while((currentObject = in.readObject()) != null)
+
+
+            for(;;)
             {
+                byte[] data = ByteUtils.GetBytesFromStream(in);
+                currentObject = ByteUtils.ParseObject(data);
                 if(currentObject instanceof String)
                 {
                     String currentLine = (String) currentObject;
-
                     //logger.log("Received message [" + currentLine + "] from server.");
                     logger.log(currentLine);
                     if (currentLine.equals("<<Terminate>>"))
-                    {
                         break;
-                    }
                 }
                 else if(currentObject instanceof SomeData)
                 {
+                    //SomeData sd = new SomeData("a", 1);
+
                     logger.log("Received object [" + currentObject.toString() + "] from server");
-                    out.writeObject("SomeData object received successfully from Server");
+                    //out.writeObject("SomeData object received successfully from Server");
+                    out.write(ByteUtils.TransmissionObject("SomeData object received successfully from Server", ByteUtils.ObjectType.STRING));
+
                     out.flush();
                 }
                 else
@@ -96,10 +106,10 @@ public class Client
         {
             e.printStackTrace();
         }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
+        //catch (ClassNotFoundException e)
+        //{
+        //    e.printStackTrace();
+        //}
 
         logger.log("--Client Execution End--");
     }
