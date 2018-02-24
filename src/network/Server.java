@@ -24,17 +24,19 @@ public class Server
     private ServerSocket serverSocket;
     private Socket clientSocket;
     public Logger logger;
-    public ArrayList<ConnectionHandler> connectionHandlers;
 
+    public ArrayList<ConnectionHandler> connectionHandlers;
+    public ArrayList<Thread> parallelThreads;
 
     public Server()
     {
         connectionHandlers = new ArrayList<ConnectionHandler>();
+        parallelThreads = new ArrayList<Thread>();
+
         logger = new Logger(SERVER_LOG_FILENAME);
         logger.log("--Server Execution Start--");
         try
         {
-            //(new Thread(new OldShit(this))).start();
             ServerConsoleThread serverConsoleThread = new ServerConsoleThread(this);
             Thread thread = new Thread(serverConsoleThread);
             thread.start();
@@ -49,11 +51,24 @@ public class Server
 
           for(;;)
           {
+              ArrayList<Integer> removal = new ArrayList<Integer>();
+              for(int i = 0; i < connectionHandlers.size(); i++)
+                  if(!connectionHandlers.get(i).isOpen())
+                      removal.add(i);
+              for(int i: removal)
+              {
+                  System.out.println("Removing handler for " + connectionHandlers.get(i).nick);
+                  connectionHandlers.remove(i);
+              }
               clientSocket = null;
               clientSocket = serverSocket.accept();
               ConnectionHandler connectionHandler = new ConnectionHandler(this, clientSocket);
               connectionHandlers.add(connectionHandler);
               (new Thread(connectionHandler)).start();
+
+
+              //parallelThreads.add(new Thread(connectionHandler));
+
           }
 
         } catch (IOException e)
@@ -64,11 +79,11 @@ public class Server
 
     }
 
-    public void ShareClientMessage(String msg, int client)
+    public void ShareClientMessage(String msg, ConnectionHandler client)
     {
         for(int i = 0; i < connectionHandlers.size(); i++)
-            if((i + 1) != client)
-                connectionHandlers.get(i).SendMessage(connectionHandlers.get(client - 1).nick + ": " +  msg);
+            if(connectionHandlers.get(i).getId() != client.getId() && connectionHandlers.get(i).isOpen())
+                connectionHandlers.get(i).SendMessage(client.nick + ": " +  msg);
     }
 
     public void haltServer()

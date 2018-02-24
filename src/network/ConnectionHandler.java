@@ -5,6 +5,7 @@ import data.SomeData;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Created by Francis Rohner on 6/10/15.
@@ -37,6 +38,8 @@ public class ConnectionHandler implements Runnable
     }
 
     public boolean isOpen() { return open; }
+    public int getId() { return clientHandled; }
+
     public void kill()
     {
         try
@@ -59,19 +62,16 @@ public class ConnectionHandler implements Runnable
         server.logger.log("New connection handler running handling client #" + clientHandled);
         try
         {
-
             out = clientSocket.getOutputStream();
             in = clientSocket.getInputStream();
-            //Send initial message to client
-            SomeData someData = new SomeData("Test", 7);
             Object currentObject;
-            //byte[] currentData;
+
             out.write(ByteUtils.TransmissionObject("<<Initiate>>", ByteUtils.ObjectType.STRING));
             out.flush();
 
-            //in.readFully(currentData);
 
-            for(;;) {
+            while(open)
+            {
 
                 byte[] streamBytes = ByteUtils.GetBytesFromStream(in);
                 currentObject = ByteUtils.ParseObject(streamBytes);
@@ -79,7 +79,7 @@ public class ConnectionHandler implements Runnable
                 if(currentObject instanceof String)
                 {
                     String currentLine = (String)currentObject;
-                    server.ShareClientMessage(currentLine, clientHandled);
+                    server.ShareClientMessage(currentLine, this);
                     server.logger.log("Received message [" + currentLine + "] from client #" + clientHandled);
                     if (currentLine.toLowerCase().equals("a"))
                     {
@@ -91,27 +91,36 @@ public class ConnectionHandler implements Runnable
                         out.flush();
                     } else if(currentLine.toLowerCase().equals("exit"))
                     {
+                        System.out.println("Client " + clientHandled + " disconnected.");
                         server.logger.log("Server sending terminate message");
                         out.write(ByteUtils.TransmissionObject("<<Terminate>>", ByteUtils.ObjectType.STRING));
                         out.flush();
                         open = false;
-                        break;
+                        //break;
+                    }
+                    else if(currentLine.toLowerCase().contains("list users"))
+                    {
+                        StringBuilder users = new StringBuilder();
+                        users.append("<<Users>>\r\n");
+                        for(ConnectionHandler handler: server.connectionHandlers)
+                            if(handler.isOpen())
+                                users.append(handler.nick + "\r\n");
+                        out.write(ByteUtils.TransmissionObject(users.toString(), ByteUtils.ObjectType.STRING));
+                        out.flush();
                     }
                     else if(currentLine.toLowerCase().contains(("set nick")))
                     {
                         nick = currentLine.replace("set nick", "").trim();
+                        server.ShareClientMessage(nick + " joined the chat.", this);
+                        out.write(ByteUtils.TransmissionObject("", ByteUtils.ObjectType.STRING));
+                        out.flush();
                     }
                     else
                     {
+                        out.write(ByteUtils.TransmissionObject(nick + ": " + currentLine, ByteUtils.ObjectType.STRING));
+                        out.flush();
                         //???
                     }
-                }
-                else if(currentObject instanceof SomeData)
-                {
-                    server.logger.log("Received object [" + currentObject.toString() + "] from client #" + clientHandled);
-                    out.write(ByteUtils.TransmissionObject("SomeData object received successfully from Client", ByteUtils.ObjectType.STRING));
-                    //out.writeObject("SomeData object received successfully from Client");
-                    out.flush();
                 }
                 else
                 {
@@ -124,13 +133,22 @@ public class ConnectionHandler implements Runnable
             in.close();
             out.close();
         }
+        catch(SocketException sex)
+        {
+            try
+            {
+                System.out.println("Client " + clientHandled + " disconnected.");
+                open = false;
+                out.flush();
+                clientSocket.close();
+            }
+            catch(Exception ex) {}
+        }
         catch(IOException ex)
         {
+            System.out.println("Client " + clientHandled + " disconnected.");
+            open = false;
             ex.printStackTrace();
         }
-        //catch (ClassNotFoundException e)
-        //{
-        //    e.printStackTrace();
-        //}
     }
 }

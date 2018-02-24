@@ -1,6 +1,7 @@
 package data;
 
 import java.io.*;
+import java.net.SocketException;
 
 /**
  * Created by Frank on 6/18/2017.
@@ -53,6 +54,7 @@ public class ByteUtils
     public static Object ParseObject(byte[] data)
     {
         Object obj = null;
+        if(data.length == 0) return null;
         byte[] objBytes = new byte[data.length - 1];
         System.arraycopy(data, 1, objBytes, 0, objBytes.length);
 
@@ -89,7 +91,7 @@ public class ByteUtils
         return mergeBytes;
     }
 
-    public static byte[] GetBytesFromStream(InputStream stream)
+    public static byte[] GetBytesFromStream(InputStream stream) throws SocketException
     {
         //System.out.println("here");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -108,9 +110,14 @@ public class ByteUtils
                     //System.out.println("EOT Detected");
                 }
             }
+            catch(SocketException ex)
+            {
+                throw ex;
+            }
             catch (IOException e)
             {
-                e.printStackTrace();
+               e.printStackTrace();
+               // throw e;
             }
             if( n < 0 )
             {
