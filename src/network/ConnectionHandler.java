@@ -32,7 +32,13 @@ public class ConnectionHandler implements Runnable
         try {
             out.write(ByteUtils.TransmissionObject(msg, ByteUtils.ObjectType.STRING));
             out.flush();
-        } catch (IOException e) {
+        }
+        catch(SocketException zex)
+        {
+            open = false;
+            server.ShareClientMessage("<<Left>>", this);
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -72,9 +78,19 @@ public class ConnectionHandler implements Runnable
             while(open)
             {
 
+                if(clientSocket.isClosed())
+                {
+                    server.ShareClientMessage("<<Left>>", this);
+                    open = false;
+                    out.flush();
+                    clientSocket.close();
+                    continue;
+                }
                 byte[] streamBytes = ByteUtils.GetBytesFromStream(in);
+                if(streamBytes == null || streamBytes.length < 1) continue;
                 currentObject = ByteUtils.ParseObject(streamBytes);
-                if(currentObject instanceof String)
+                ByteUtils.ObjectType objectType = ByteUtils.GetObjectType(streamBytes);
+                if(objectType == ByteUtils.ObjectType.STRING)
                 {
                     String currentLine = (String)currentObject;
 
@@ -110,6 +126,10 @@ public class ConnectionHandler implements Runnable
                         out.write(ByteUtils.TransmissionObject(nick + ": " + currentLine, ByteUtils.ObjectType.STRING));
                         out.flush();
                     }
+                }
+                else if(objectType == ByteUtils.ObjectType.FILE)
+                {
+
                 }
                 else
                 {

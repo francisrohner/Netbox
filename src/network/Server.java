@@ -51,15 +51,7 @@ public class Server
 
           for(;;)
           {
-              ArrayList<Integer> removal = new ArrayList<Integer>();
-              for(int i = 0; i < connectionHandlers.size(); i++)
-                  if(!connectionHandlers.get(i).isOpen())
-                      removal.add(i);
-              for(int i = removal.size() - 1; i > 0; i--)
-              {
-                  System.out.println("Removing handler for " + connectionHandlers.get(removal.get(i)).nick);
-                  connectionHandlers.remove(removal.get(i));
-              }
+              Cleanup();
               clientSocket = null;
               clientSocket = serverSocket.accept();
               ConnectionHandler connectionHandler = new ConnectionHandler(this, clientSocket);
@@ -77,6 +69,20 @@ public class Server
         }
 
 
+    }
+
+    void Cleanup()
+    {
+        ArrayList<Integer> removal = new ArrayList<Integer>();
+        for(int i = 0; i < connectionHandlers.size(); i++)
+            if(!connectionHandlers.get(i).isOpen())
+                removal.add(i);
+        for(int i = removal.size() - 1; i >= 0; i--)
+        {
+            System.out.println("Removing handler for " + connectionHandlers.get(removal.get(i)).nick + " at index " + removal.get(i));
+            connectionHandlers.remove(removal.get(i));
+
+        }
     }
 
     public void ShareClientMessage(String msg, ConnectionHandler client)
