@@ -11,9 +11,9 @@ public class ByteUtils
     private static byte[] EOT_DATA = (new String("<<EOT>>")).getBytes();
     private static byte[] DEBUG_DATA = (new String("TestMessage<<EOT>>")).getBytes();
 
+    private static byte BYTE_STRING = 0;
     private static byte BYTE_FILE = 1;
     private static byte BYTE_OBJECT = 2;
-    private static byte BYTE_STRING = 0;
 
     public enum ObjectType
     {
@@ -28,9 +28,12 @@ public class ByteUtils
         int eotIndex = 0;
         for (int i = 0; i < data.length && eotIndex < EOT_DATA.length; i++)
         {
-            if (data[i] == EOT_DATA[eotIndex] && eotIndex == 0)
-                eotStartIndex = i;
-            if (data[i] != EOT_DATA[eotIndex++]) //reset
+            if (data[i] == EOT_DATA[eotIndex++])
+            {
+                if(eotIndex == 1) //Previous value was 0 and it matched, set start index
+                    eotStartIndex = i;
+            }
+            else
             {
                 eotIndex = 0; //Reset check
                 eotStartIndex = -1;
@@ -102,7 +105,6 @@ public class ByteUtils
                 if(eotDetected)
                 {
                     n -= EOT_DATA.length; //Remove EOT from data
-                    //System.out.println("EOT Detected");
                 }
             }
             catch(SocketException ex)

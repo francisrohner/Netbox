@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="Netbox:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/Netbox_jar</output-path>
+  <artifact type="jar" build-on-make="true" name="Client JAR">
+    <output-path>$PROJECT_DIR$/out/artifacts/Client_JAR</output-path>
     <root id="archive" name="Netbox.jar">
       <element id="module-output" name="Netbox" />
     </root>
