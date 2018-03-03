@@ -55,10 +55,10 @@ public class Server
               for(int i = 0; i < connectionHandlers.size(); i++)
                   if(!connectionHandlers.get(i).isOpen())
                       removal.add(i);
-              for(int i: removal)
+              for(int i = removal.size() - 1; i > 0; i--)
               {
-                  System.out.println("Removing handler for " + connectionHandlers.get(i).nick);
-                  connectionHandlers.remove(i);
+                  System.out.println("Removing handler for " + connectionHandlers.get(removal.get(i)).nick);
+                  connectionHandlers.remove(removal.get(i));
               }
               clientSocket = null;
               clientSocket = serverSocket.accept();

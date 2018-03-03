@@ -10,17 +10,20 @@ public class ByteUtils
 {
     private static byte[] EOT_DATA = (new String("<<EOT>>")).getBytes();
     private static byte[] DEBUG_DATA = (new String("TestMessage<<EOT>>")).getBytes();
-    private static byte BYTE_FILE = 2;
-    private static byte BYTE_OBJECT = 1;
+
+    private static byte BYTE_FILE = 1;
+    private static byte BYTE_OBJECT = 2;
     private static byte BYTE_STRING = 0;
+
     public enum ObjectType
     {
         STRING,
-        OBJECT,
-        FILE
+        FILE,
+        OBJECT
     }
 
-    private static int LocateEOT(byte[] data) {
+    private static int LocateEOT(byte[] data)
+    {
         int eotStartIndex = -1;
         int eotIndex = 0;
         for (int i = 0; i < data.length && eotIndex < EOT_DATA.length; i++)
@@ -32,21 +35,17 @@ public class ByteUtils
                 eotIndex = 0; //Reset check
                 eotStartIndex = -1;
             }
-            //if(data[i] == EOT_DATA[eotIndex] && eotIndex == EOT_DATA.length - 1) //Reached end of EOT
-            //    break;
-
         }
         return eotStartIndex;
-
     }
 
     public static ObjectType GetObjectType(byte[] data)
     {
         if(data[0] == BYTE_STRING)
             return ObjectType.STRING;
-        else if(data[1] == BYTE_OBJECT)
+        else if(data[0] == BYTE_OBJECT)
             return  ObjectType.OBJECT;
-        else if(data[2] == BYTE_FILE)
+        else if(data[0] == BYTE_FILE)
             return ObjectType.FILE;
         else return null;
     }
@@ -57,13 +56,10 @@ public class ByteUtils
         if(data.length == 0) return null;
         byte[] objBytes = new byte[data.length - 1];
         System.arraycopy(data, 1, objBytes, 0, objBytes.length);
-
         if(data[0] == BYTE_FILE)
             obj = objBytes;
         else if(data[0] == BYTE_STRING)
-        {
             obj = new String(objBytes);
-        }
         else
             obj = BytesToObject(objBytes);
         return obj;
@@ -93,12 +89,11 @@ public class ByteUtils
 
     public static byte[] GetBytesFromStream(InputStream stream) throws SocketException
     {
-        //System.out.println("here");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         byte[] buf = new byte[2048];
         boolean eotDetected = false;
-        while(!eotDetected) {
+        while(!eotDetected)
+        {
             int n = 0;
             try
             {
@@ -121,7 +116,6 @@ public class ByteUtils
             }
             if( n < 0 )
             {
-                //System.out.println("breaking");
                 break;
             }
             baos.write(buf,0,n);
@@ -141,8 +135,8 @@ public class ByteUtils
     {
         byte[] objBytes = null;
         byte[] bytesOut = null;
-        try {
-            //bytesOut = new byte[objBytes.length + 1];
+        try
+        {
             if(type == ObjectType.STRING)
             {
                 objBytes = ((String)object).getBytes();
@@ -168,13 +162,14 @@ public class ByteUtils
                 bytesOut[0] = BYTE_FILE;
             }
             System.arraycopy(objBytes, 0, bytesOut, 1, objBytes.length);
-            //bytesOut = bos.toByteArray();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
 
         }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {}
         return bytesOut;
     }
 
@@ -195,8 +190,8 @@ public class ByteUtils
                 if (in != null) {
                     in.close();
                 }
-            } catch (IOException ex) {
-                // ignore close exception
+            } catch (IOException ex)
+            {
             }
         }
         return o;

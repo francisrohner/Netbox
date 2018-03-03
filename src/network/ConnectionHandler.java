@@ -46,7 +46,6 @@ public class ConnectionHandler implements Runnable
         {
             out.write(ByteUtils.TransmissionObject("<<Terminate>>", ByteUtils.ObjectType.STRING));
             out.flush();
-            //out.writeObject("<<Terminate>>");
         }
         catch (IOException e)
         {
@@ -75,28 +74,18 @@ public class ConnectionHandler implements Runnable
 
                 byte[] streamBytes = ByteUtils.GetBytesFromStream(in);
                 currentObject = ByteUtils.ParseObject(streamBytes);
-                //ByteUtils.
                 if(currentObject instanceof String)
                 {
                     String currentLine = (String)currentObject;
-                    server.ShareClientMessage(currentLine, this);
+
                     server.logger.log("Received message [" + currentLine + "] from client #" + clientHandled);
-                    if (currentLine.toLowerCase().equals("a"))
-                    {
-                        out.write(ByteUtils.TransmissionObject("Response A", ByteUtils.ObjectType.STRING));
-                        out.flush();
-                    } else if (currentLine.toLowerCase().equals("b"))
-                    {
-                        out.write(ByteUtils.TransmissionObject("Response B", ByteUtils.ObjectType.STRING));
-                        out.flush();
-                    } else if(currentLine.toLowerCase().equals("exit"))
+                    if(currentLine.toLowerCase().equals("exit"))
                     {
                         System.out.println("Client " + clientHandled + " disconnected.");
                         server.logger.log("Server sending terminate message");
                         out.write(ByteUtils.TransmissionObject("<<Terminate>>", ByteUtils.ObjectType.STRING));
                         out.flush();
                         open = false;
-                        //break;
                     }
                     else if(currentLine.toLowerCase().contains("list users"))
                     {
@@ -111,33 +100,33 @@ public class ConnectionHandler implements Runnable
                     else if(currentLine.toLowerCase().contains(("set nick")))
                     {
                         nick = currentLine.replace("set nick", "").trim();
-                        server.ShareClientMessage(nick + " joined the chat.", this);
+                        server.ShareClientMessage("<<Join>>", this);
                         out.write(ByteUtils.TransmissionObject("", ByteUtils.ObjectType.STRING));
                         out.flush();
                     }
                     else
                     {
+                        server.ShareClientMessage(currentLine, this);
                         out.write(ByteUtils.TransmissionObject(nick + ": " + currentLine, ByteUtils.ObjectType.STRING));
                         out.flush();
-                        //???
                     }
                 }
                 else
                 {
                     server.logger.log("Unknown object received from Client");
                     out.write(ByteUtils.TransmissionObject("Unknown object received from Client", ByteUtils.ObjectType.STRING));
-                    //out.writeObject("Unknown object received from Client");
                     out.flush();
                 }
             }
             in.close();
             out.close();
         }
-        catch(SocketException sex)
+        catch(SocketException zex)
         {
             try
             {
                 System.out.println("Client " + clientHandled + " disconnected.");
+                server.ShareClientMessage("<<Left>>", this);
                 open = false;
                 out.flush();
                 clientSocket.close();
@@ -147,6 +136,7 @@ public class ConnectionHandler implements Runnable
         catch(IOException ex)
         {
             System.out.println("Client " + clientHandled + " disconnected.");
+            server.ShareClientMessage("<<Left>>", this);
             open = false;
             ex.printStackTrace();
         }
