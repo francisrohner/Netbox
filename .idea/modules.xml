@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Netbox.iml" filepath="$PROJECT_DIR$/Netbox.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Netbox.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Netbox.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Netbox.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Netbox.test.iml" />
     </modules>
   </component>
 </project>

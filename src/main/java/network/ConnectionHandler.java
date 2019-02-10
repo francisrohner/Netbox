@@ -1,6 +1,6 @@
-package main.java.network;
+package network;
 
-import main.java.data.ByteUtils;
+import data.ByteUtils;
 
 import java.io.*;
 import java.net.Socket;

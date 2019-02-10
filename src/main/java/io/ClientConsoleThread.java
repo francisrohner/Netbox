@@ -1,6 +1,6 @@
-package main.java.io;
+package io;
 
-import main.java.network.Client;
+import network.Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;

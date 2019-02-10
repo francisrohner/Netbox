@@ -1,10 +1,8 @@
-package main.java.network;
+package network;
 
-import main.java.data.ByteUtils;
-import main.java.data.SomeData;
-import main.java.io.ConfigReader;
-import main.java.io.ClientConsoleThread;
-import main.java.io.Logger;
+import data.ByteUtils;
+import data.SomeData;
+import io.*;
 
 import java.io.*;
 import java.net.Socket;
