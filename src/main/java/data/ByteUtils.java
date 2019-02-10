@@ -1,4 +1,4 @@
-package data;
+package main.java.data;
 
 import java.io.*;
 import java.net.SocketException;
@@ -104,7 +104,7 @@ public class ByteUtils
                 eotDetected = LocateEOT(buf) != -1;
                 if(eotDetected)
                 {
-                    n -= EOT_DATA.length; //Remove EOT from data
+                    n -= EOT_DATA.length; //Remove EOT from main.java.data
                 }
             }
             catch(SocketException ex)

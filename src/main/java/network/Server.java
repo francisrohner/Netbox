@@ -1,8 +1,8 @@
-package network;
+package main.java.network;
 
-import io.ConfigReader;
-import io.Logger;
-import io.ServerConsoleThread;
+import main.java.io.ConfigReader;
+import main.java.io.Logger;
+import main.java.io.ServerConsoleThread;
 
 import java.io.*;
 import java.net.ServerSocket;
