@@ -1,1 +1,1 @@
-﻿Java socket programming sandbox
+Basic Socket server sandbox implementation.
