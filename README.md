@@ -1,3 +1,3 @@
-#Netbox Server
+#Netbox
 
 Basic Socket server sandbox implementation.
