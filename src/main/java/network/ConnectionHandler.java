@@ -35,7 +35,7 @@ public class ConnectionHandler implements Runnable
         catch(SocketException zex)
         {
             open = false;
-            server.ShareClientMessage("<<Left>>", this);
+            server.shareClientMessage("<<Left>>", this);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -58,6 +58,22 @@ public class ConnectionHandler implements Runnable
         }
     }
 
+    public void send(Object o) throws IOException {
+        if(o instanceof String)
+        {
+            out.write(ByteUtils.TransmissionObject(o, ByteUtils.ObjectType.STRING));
+        }
+        else if(o instanceof byte[])
+        {
+            byte[] file = (byte[])o;
+            //First 1530 bytes are UTF-8 string
+
+
+            //Add header
+        }
+        out.flush();
+    }
+
     @Override
     public void run()
     {
@@ -70,16 +86,14 @@ public class ConnectionHandler implements Runnable
             in = clientSocket.getInputStream();
             Object currentObject;
 
-            out.write(ByteUtils.TransmissionObject("<<Initiate>>", ByteUtils.ObjectType.STRING));
-            out.flush();
-
+            send("<<Initiate>>");
 
             while(open)
             {
 
                 if(clientSocket.isClosed())
                 {
-                    server.ShareClientMessage("<<Left>>", this);
+                    server.shareClientMessage("<<Left>>", this);
                     open = false;
                     out.flush();
                     clientSocket.close();
@@ -102,6 +116,11 @@ public class ConnectionHandler implements Runnable
                         out.flush();
                         open = false;
                     }
+                    else if(currentLine.toLowerCase().equals("terminate"))
+                    {
+                        send("<<Terminate>>");
+                        server.haltServer();
+                    }
                     else if(currentLine.toLowerCase().contains("list users"))
                     {
                         StringBuilder users = new StringBuilder();
@@ -115,13 +134,13 @@ public class ConnectionHandler implements Runnable
                     else if(currentLine.toLowerCase().contains(("set nick")))
                     {
                         nick = currentLine.replace("set nick", "").trim();
-                        server.ShareClientMessage("<<Join>>", this);
+                        server.shareClientMessage("<<Join>>", this);
                         out.write(ByteUtils.TransmissionObject("", ByteUtils.ObjectType.STRING));
                         out.flush();
                     }
                     else
                     {
-                        server.ShareClientMessage(currentLine, this);
+                        server.shareClientMessage(currentLine, this);
                         out.write(ByteUtils.TransmissionObject(nick + ": " + currentLine, ByteUtils.ObjectType.STRING));
                         out.flush();
                     }
@@ -145,7 +164,7 @@ public class ConnectionHandler implements Runnable
             try
             {
                 System.out.println("Client " + clientHandled + " disconnected.");
-                server.ShareClientMessage("<<Left>>", this);
+                server.shareClientMessage("<<Left>>", this);
                 open = false;
                 out.flush();
                 clientSocket.close();
@@ -155,7 +174,7 @@ public class ConnectionHandler implements Runnable
         catch(IOException ex)
         {
             System.out.println("Client " + clientHandled + " disconnected.");
-            server.ShareClientMessage("<<Left>>", this);
+            server.shareClientMessage("<<Left>>", this);
             open = false;
             ex.printStackTrace();
         }

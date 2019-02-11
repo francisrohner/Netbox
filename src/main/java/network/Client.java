@@ -6,6 +6,7 @@ import io.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
 
 /**
  * Created by Francis Rohner on 6/9/15.
@@ -110,10 +111,26 @@ public class Client
         //}
 
         logger.log("--Client Execution End--");
+        System.exit(0);
     }
     public static void main(String args[])
     {
-        IGNORE_CONFIG = args.length > 0 && args[0].equalsIgnoreCase("noconfig");
+        HashMap<String, String> dict_args = new HashMap<>();
+        int i = 0;
+        while(i < args.length)
+        {
+            if(i == args.length - 1 || args[i+1].startsWith("--")) //flag
+            {
+                dict_args.put(args[i].substring(2).toLowerCase(), "true");
+                i++;
+            }
+            else
+            {
+                dict_args.put(args[i].toLowerCase(), args[i+1]);
+                i += 2;
+            }
+        }
+        IGNORE_CONFIG = dict_args.containsKey("noconfig");
         new Client();
     }
 }

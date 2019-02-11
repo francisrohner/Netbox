@@ -2,6 +2,7 @@ package data;
 
 import java.io.*;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by Frank on 6/18/2017.
@@ -58,11 +59,13 @@ public class ByteUtils
         Object obj = null;
         if(data.length == 0) return null;
         byte[] objBytes = new byte[data.length - 1];
+
         System.arraycopy(data, 1, objBytes, 0, objBytes.length);
+
         if(data[0] == BYTE_FILE)
             obj = objBytes;
         else if(data[0] == BYTE_STRING)
-            obj = new String(objBytes);
+            obj = new String(objBytes, StandardCharsets.UTF_8);
         else
             obj = BytesToObject(objBytes);
         return obj;
@@ -141,7 +144,7 @@ public class ByteUtils
         {
             if(type == ObjectType.STRING)
             {
-                objBytes = ((String)object).getBytes();
+                objBytes = ((String)object).getBytes(StandardCharsets.UTF_8);
                 bytesOut = new byte[objBytes.length + 1];
                 bytesOut[0] = BYTE_STRING;
             }
@@ -163,6 +166,7 @@ public class ByteUtils
                 bytesOut = new byte[objBytes.length + 1];
                 bytesOut[0] = BYTE_FILE;
             }
+
             System.arraycopy(objBytes, 0, bytesOut, 1, objBytes.length);
 
         }

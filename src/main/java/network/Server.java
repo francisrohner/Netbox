@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Francis Rohner on 6/9/15.
@@ -15,29 +16,32 @@ public class Server
 {
 
     private static boolean IGNORE_CONFIG;
-    public static int numClients = 0;
+    private static boolean DISABLE_STDIN;
     private static final String SERVER_CONFIG_FILENAME = "Server.cfg";
     private static final String SERVER_LOG_FILENAME = "ServerLog.txt";
     private static final int    SERVER_DEFAULT_PORT = 3141;
     private ServerSocket serverSocket;
     private Socket clientSocket;
-    public Logger logger;
 
+    public Logger logger;
     public ArrayList<ConnectionHandler> connectionHandlers;
-    public ArrayList<Thread> parallelThreads;
+    public static int numClients = 0;
 
     public Server()
     {
         connectionHandlers = new ArrayList<ConnectionHandler>();
-        parallelThreads = new ArrayList<Thread>();
 
         logger = new Logger(SERVER_LOG_FILENAME);
         logger.log("--Server Execution Start--");
         try
         {
-            ServerConsoleThread serverConsoleThread = new ServerConsoleThread(this);
-            Thread thread = new Thread(serverConsoleThread);
-            thread.start();
+
+            if(!DISABLE_STDIN)
+            {
+                ServerConsoleThread serverConsoleThread = new ServerConsoleThread(this);
+                Thread thread = new Thread(serverConsoleThread);
+                thread.start();
+            }
 
             int serverPort = SERVER_DEFAULT_PORT;
             if ((new File(SERVER_CONFIG_FILENAME)).exists())
@@ -49,16 +53,12 @@ public class Server
 
           for(;;)
           {
-              Cleanup();
+              cleanup();
               clientSocket = null;
               clientSocket = serverSocket.accept();
               ConnectionHandler connectionHandler = new ConnectionHandler(this, clientSocket);
               connectionHandlers.add(connectionHandler);
               (new Thread(connectionHandler)).start();
-
-
-              //parallelThreads.add(new Thread(connectionHandler));
-
           }
 
         } catch (IOException e)
@@ -69,7 +69,7 @@ public class Server
 
     }
 
-    void Cleanup()
+    private void cleanup()
     {
         ArrayList<Integer> removal = new ArrayList<Integer>();
         for(int i = 0; i < connectionHandlers.size(); i++)
@@ -79,11 +79,10 @@ public class Server
         {
             System.out.println("Removing handler for " + connectionHandlers.get(removal.get(i)).nick + " at index " + removal.get(i));
             connectionHandlers.remove(removal.get(i));
-
         }
     }
 
-    public void ShareClientMessage(String msg, ConnectionHandler client)
+    public void shareClientMessage(String msg, ConnectionHandler client)
     {
         for(int i = 0; i < connectionHandlers.size(); i++)
             if(connectionHandlers.get(i).getId() != client.getId() && connectionHandlers.get(i).isOpen())
@@ -101,7 +100,23 @@ public class Server
     }
     public static void main(String args[])
     {
-        IGNORE_CONFIG = args.length > 0 && args[0].equalsIgnoreCase("noconfig");
+        HashMap<String, String> dict_args = new HashMap<>();
+        int i = 0;
+        while(i < args.length)
+        {
+            if(i == args.length - 1 || args[i+1].startsWith("--")) //flag
+            {
+                dict_args.put(args[i].substring(2).toLowerCase(), "true");
+                i++;
+            }
+            else
+            {
+                dict_args.put(args[i].toLowerCase(), args[i+1]);
+                i += 2;
+            }
+        }
+        IGNORE_CONFIG = dict_args.containsKey("noconfig");
+        DISABLE_STDIN = dict_args.containsKey("disable_stdin");
         new Server();
     }
 

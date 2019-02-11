@@ -22,7 +22,7 @@ public class ClientConsoleThread extends Thread
     public void run()
     {
         String currentLine = "";
-        while(!currentLine.equalsIgnoreCase("end"))
+        while(!currentLine.equalsIgnoreCase("<<Terminate>>"))
         {
             try {
                 currentLine = reader.readLine();

@@ -26,6 +26,7 @@ public class ServerConsoleThread extends Thread
         {
             try {
                 currentLine = reader.readLine();
+
                 if(currentLine.equalsIgnoreCase("exit"))
                     server.haltServer();
                 else
