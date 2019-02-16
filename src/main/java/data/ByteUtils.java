@@ -3,12 +3,14 @@ package data;
 import java.io.*;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.nio.*;
 
 /**
  * Created by Frank on 6/18/2017.
  */
 public class ByteUtils
 {
+    
     private static byte[] EOT_DATA = (new String("<<EOT>>")).getBytes();
     private static byte[] DEBUG_DATA = (new String("TestMessage<<EOT>>")).getBytes();
 
@@ -82,7 +84,11 @@ public class ByteUtils
         if(merge.length == a.length + b.length)
             System.out.println("Merge test passed.");
         Object myObj = new String("someData");
-
+	byte[] data = new byte[] { 0, 0, 0, 1};
+	System.out.println(GetTransmissionVersion(data));
+	//short valFromHex = Short.parseShort("0xFF", 16);
+	data[3] = (byte)0xfe;
+	System.out.println(GetTransmissionVersion(data));
     }
 
     public static byte[] Merge(byte[] a, byte[] b)
@@ -93,6 +99,12 @@ public class ByteUtils
         return mergeBytes;
     }
 
+    public static int GetTransmissionVersion(byte[] buf)
+    {
+	//Check revision bytes (if not exists is revision 1)
+	ByteBuffer wrapped = ByteBuffer.wrap(buf);
+	return wrapped.getInt();
+    }
     public static byte[] GetBytesFromStream(InputStream stream) throws SocketException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -118,7 +130,7 @@ public class ByteUtils
             {
                e.printStackTrace();
                // throw e;
-            }
+	    }
             if( n < 0 )
             {
                 break;
@@ -152,7 +164,7 @@ public class ByteUtils
             {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out;
-                 out = new ObjectOutputStream(bos);
+                out = new ObjectOutputStream(bos);
                 out.writeObject(object);
                 out.flush();
                 objBytes =  bos.toByteArray();
@@ -214,5 +226,7 @@ public class ByteUtils
         } catch (IOException e) {
             e.printStackTrace();
         }
+	//byte[] data = new byte[] { 0, 0, 0, 1 };
+	//System.out.println(GetTransmissionVersion(data));
     }
 }

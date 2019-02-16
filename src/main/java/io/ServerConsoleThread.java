@@ -30,7 +30,7 @@ public class ServerConsoleThread extends Thread
                 if(currentLine.equalsIgnoreCase("exit"))
                     server.haltServer();
                 else
-                    server.Send(currentLine);
+                    server.send(currentLine);
             } catch (IOException e) {
                 e.printStackTrace();
             }

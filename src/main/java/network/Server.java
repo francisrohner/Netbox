@@ -120,7 +120,7 @@ public class Server
         new Server();
     }
 
-    public void Send(String currentLine)
+    public void send(String currentLine)
     {
         for(ConnectionHandler handler : connectionHandlers)
             if(handler.isOpen())

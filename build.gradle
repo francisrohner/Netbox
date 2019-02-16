@@ -4,3 +4,11 @@ task(server, dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     args '--disable_stdin'
 }
+task(byte_utils, dependsOn: 'classes', type: JavaExec) {
+    main = 'data.ByteUtils'
+    classpath = sourceSets.main.runtimeClasspath
+    args ''
+}
+
+
+
